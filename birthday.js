@@ -67,6 +67,8 @@ const barBot  = $('barBot');
 const uline   = $('uline').querySelector('.uline__path');
 const bloom   = $('bloom');
 const polaroids = $('polaroids');
+const countdown = $('countdown');
+const countdownNumber = $('countdownNumber');
 
 const bgMusic = $('bgMusic');
 const bowSound = $('bowSound');
@@ -982,7 +984,7 @@ function buildFilm(m){
   // reset (t=0)
   t.set(target, { y: 0, scaleX: 1, scaleY: 1, opacity: 1 })
    .set(arrow, { opacity: 1, x: arrowBaseX, y: m.arrowStartY, scaleY: 1 })
-   .set([flood, bloom], { autoAlpha: 0, scale: 0.001, x: 0, y: 0 })
+   .set([flood, bloom, countdown], { autoAlpha: 0, scale: 0.001, x: 0, y: 0 })
    .set(flood, { x: m.fx, y: m.fy })
    .set(field, { autoAlpha: 0 })
    .set('.blob', { opacity: 0 })
@@ -1015,50 +1017,67 @@ function buildFilm(m){
    .set(arrow, { rotation: 0 }, 0.52)
    .to(arrow, { opacity: 0, duration: 0.16, ease: 'power1.out' }, 0.56);
 
+  // --- the countdown --------------------------------------------------------
+  t.set(countdown, { autoAlpha: 1, scale: 1, opacity: 1 }, 0.6)
+   .call(() => { countdownNumber.innerText = "3"; }, [], 0.6)
+   .fromTo(countdownNumber, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.7)' }, 0.6)
+   .to(countdownNumber, { opacity: 0, scale: 1.5, duration: 0.4, ease: 'power2.in' }, 1.2)
+
+   .call(() => { countdownNumber.innerText = "2"; }, [], 1.6)
+   .fromTo(countdownNumber, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.7)' }, 1.6)
+   .to(countdownNumber, { opacity: 0, scale: 1.5, duration: 0.4, ease: 'power2.in' }, 2.2)
+
+   .call(() => { countdownNumber.innerText = "1"; }, [], 2.6)
+   .fromTo(countdownNumber, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.7)' }, 2.6)
+   .to(countdownNumber, { opacity: 0, scale: 1.5, duration: 0.4, ease: 'power2.in' }, 3.2)
+   .set(countdown, { autoAlpha: 0 }, 3.6);
+
+  const dt = 3.2; // time shifted for everything after countdown
+
   // --- the fall + the burst / flood -----------------------------------------
-  t.to(target, { y: m.fallPx, scaleX: 0.84, scaleY: 1.3, duration: 0.34, ease: 'power1.in' }, 0.64)
-   .to(target, { scaleX: 1.4, scaleY: 0.6, duration: 0.07, ease: 'power2.out' }, 0.98)
-   .set(flood, { autoAlpha: 1 }, 1.00)
-   .fromTo(flood, { scale: 0.02 }, { scale: m.floodScale, duration: 0.34, ease: 'power2.in' }, 1.00)
-   .to(target, { opacity: 0, duration: 0.12, ease: 'power1.out' }, 1.06);
+  t.to(target, { y: m.fallPx, scaleX: 0.84, scaleY: 1.3, duration: 0.34, ease: 'power1.in' }, 0.64 + dt)
+   .to(target, { scaleX: 1.4, scaleY: 0.6, duration: 0.07, ease: 'power2.out' }, 0.98 + dt)
+   .set(flood, { autoAlpha: 1 }, 1.00 + dt)
+   .fromTo(flood, { scale: 0.02 }, { scale: m.floodScale, duration: 0.34, ease: 'power2.in' }, 1.00 + dt)
+   .to(target, { opacity: 0, duration: 0.12, ease: 'power1.out' }, 1.06 + dt);
 
   // seam: the field is the same rose as the flood
-  t.set(field, { autoAlpha: 1 }, 1.32)
-   .set(hero, { autoAlpha: 0 }, 1.33)
-   .to('.blob', { opacity: 1, duration: 0.6, ease: 'power2.out' }, 1.34)
-   .set(flood, { autoAlpha: 0 }, 1.36);
+  t.set(field, { autoAlpha: 1 }, 1.32 + dt)
+   .set(hero, { autoAlpha: 0 }, 1.33 + dt)
+   .to('.blob', { opacity: 1, duration: 0.6, ease: 'power2.out' }, 1.34 + dt)
+   .set(flood, { autoAlpha: 0 }, 1.36 + dt);
 
   // --- the camera push -------------------------------------------------------
   // duration matched to when the bloom covers (3.98) — a longer push used to
   // keep the timeline (and a white bloom) alive after the tree should already
   // be growing, which read as dead time before the tree appeared.
-  t.fromTo(camera, { scale: 1.0, yPercent: 0 }, { scale: 1.07, yPercent: -1.3, duration: 2.6, ease: 'none' }, 1.38)
-   .fromTo(fgrid, { xPercent: 0, yPercent: 0 }, { xPercent: -1.5, yPercent: -1.0, duration: 2.6, ease: 'none' }, 1.38);
+  t.fromTo(camera, { scale: 1.0, yPercent: 0 }, { scale: 1.07, yPercent: -1.3, duration: 2.6, ease: 'none' }, 1.38 + dt)
+   .fromTo(fgrid, { xPercent: 0, yPercent: 0 }, { xPercent: -1.5, yPercent: -1.0, duration: 2.6, ease: 'none' }, 1.38 + dt);
 
   // beat markers for the recorder's soundtrack (no-ops off ?record)
   t.call(cue, ['hit'], 0.26)
    .call(() => { if (hitSound) { hitSound.currentTime = 0; hitSound.play().catch(()=>{}); } }, [], 0.26)
-   .call(cue, ['flood'], 1.00)
-   .call(cue, ['wish'], 1.68)
-   .call(cue, ['wish2'], 2.06)
-   .call(cue, ['bloom'], 3.42);
+   .call(cue, ['flood'], 1.00 + dt)
+   .call(cue, ['wish'], 1.68 + dt)
+   .call(cue, ['wish2'], 2.06 + dt)
+   .call(cue, ['bloom'], 3.42 + dt);
 
   // cinema bars ease into a letterbox
-  t.to(barTop, { yPercent: 0, duration: 0.6, ease: 'power2.out' }, 1.5)
-   .to(barBot, { yPercent: 0, duration: 0.6, ease: 'power2.out' }, 1.5);
+  t.to(barTop, { yPercent: 0, duration: 0.6, ease: 'power2.out' }, 1.5 + dt)
+   .to(barBot, { yPercent: 0, duration: 0.6, ease: 'power2.out' }, 1.5 + dt);
 
   // --- the kinetic wish ------------------------------------------------------
-  t.to(kEyebrow, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' }, 1.54)
-   .to(line1Chars, { yPercent: 0, rotationX: 0, duration: 0.55, ease: 'power3.out', stagger: 0.033 }, 1.68)
-   .to(line2Chars, { yPercent: 0, rotationX: 0, duration: 0.55, ease: 'power3.out', stagger: 0.033 }, 2.06)
-   .to(uline, { drawn: 1, duration: 0.45, ease: 'power2.inOut' }, 2.54)
-   .to(kSub, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' }, 2.74);
+  t.to(kEyebrow, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' }, 1.54 + dt)
+   .to(line1Chars, { yPercent: 0, rotationX: 0, duration: 0.55, ease: 'power3.out', stagger: 0.033 }, 1.68 + dt)
+   .to(line2Chars, { yPercent: 0, rotationX: 0, duration: 0.55, ease: 'power3.out', stagger: 0.033 }, 2.06 + dt)
+   .to(uline, { drawn: 1, duration: 0.45, ease: 'power2.inOut' }, 2.54 + dt)
+   .to(kSub, { opacity: 1, y: 0, duration: 0.45, ease: 'power3.out' }, 2.74 + dt);
 
   // --- the handoff bloom -----------------------------------------------------
-  t.to(barTop, { yPercent: -100, duration: 0.5, ease: 'power2.in' }, 3.32)
-   .to(barBot, { yPercent: 100, duration: 0.5, ease: 'power2.in' }, 3.32)
-   .set(bloom, { autoAlpha: 1 }, 3.42)
-   .fromTo(bloom, { scale: 0.02 }, { scale: m.bloomScale, duration: 0.58, ease: 'power2.in' }, 3.42);
+  t.to(barTop, { yPercent: -100, duration: 0.5, ease: 'power2.in' }, 3.32 + dt)
+   .to(barBot, { yPercent: 100, duration: 0.5, ease: 'power2.in' }, 3.32 + dt)
+   .set(bloom, { autoAlpha: 1 }, 3.42 + dt)
+   .fromTo(bloom, { scale: 0.02 }, { scale: m.bloomScale, duration: 0.58, ease: 'power2.in' }, 3.42 + dt);
 
   return t;
 }

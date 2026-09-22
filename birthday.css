@@ -694,3 +694,38 @@ body{
     max-width: 150px;
   }
 }
+
+/* ============================================================
+   COUNTDOWN ACTION
+   ============================================================ */
+.countdown {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+#countdownNumber {
+  font-family: 'Fraunces', serif;
+  font-size: 15rem;
+  font-weight: 900;
+  color: #ff6f97;
+  text-shadow: 0 0 40px rgba(255, 111, 151, 0.6), 0 0 80px rgba(255, 217, 228, 0.4);
+  background: -webkit-linear-gradient(#fff, #ffb14e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transform: scale(0.5);
+  opacity: 0;
+}
+
+@media (max-width: 768px) {
+  #countdownNumber {
+    font-size: 10rem;
+  }
+}
